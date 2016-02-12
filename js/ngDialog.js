@@ -44,6 +44,7 @@
             className: 'ngdialog-theme-default',
             disableAnimation: false,
             plain: false,
+            showMinimize: true,
             showClose: true,
             closeByDocument: true,
             closeByEscape: true,
@@ -163,11 +164,13 @@
                             previousFocus.focus();
                         }
 
+                        var isMinimized = $el(document.getElementById(id + '-minimized')).length === 1;
+
                         $rootScope.$broadcast('ngDialog.closing', $dialog, value);
                         dialogsCount = dialogsCount < 0 ? 0 : dialogsCount;
-                        if (animationEndSupport && !options.disableAnimation) {
+                        if (animationEndSupport && !options.disableAnimation && !isMinimized) {
                             scope.$destroy();
-                            $dialog.unbind(animationEndEvent).bind(animationEndEvent, function () {
+                            $dialog.unbind(animationEndEvent).bind(animationEndEvent, function() {
                                 privateMethods.closeDialogElement($dialog, value);
                             }).addClass('ngdialog-closing');
                         } else {
@@ -440,6 +443,30 @@
                             return '$stateChangeSuccess';
                         }
                         return '$locationChangeSuccess';
+                    },
+
+                    showDialog: function($dialog) {
+                        $dialog.css({
+                            display: 'block'
+                        });
+                    },
+
+                    hideDialog: function ($dialog) {
+                        $dialog.css({
+                            display: 'none'
+                        });
+                    },
+
+                    closeMinimize: function (minimizedId) {
+                        var minimizedElement = document.getElementById(minimizedId);
+                        var maximizeBtn = minimizedElement.getElementsByClassName("ngdialog-maximize-btn");
+                        $el(maximizeBtn[0]).unbind('click');
+
+                        var closeMinimizeBtn = minimizedElement.getElementsByClassName("ngdialog-close");
+                        $el(closeMinimizeBtn).unbind('click');
+
+                        var $minimized = $el(minimizedElement);
+                        $minimized.remove();
                     }
                 };
 
@@ -455,6 +482,7 @@
                      * - controllerAs {String}
                      * - className {String} - dialog theme class
                      * - disableAnimation {Boolean} - set to true to disable animation
+                     * - showMinimize {Boolean} - show minimize button, default false
                      * - showClose {Boolean} - show close button, default true
                      * - closeByEscape {Boolean} - default true
                      * - closeByDocument {Boolean} - default true
@@ -500,6 +528,10 @@
 
                             if (options.showClose) {
                                 template += '<div class="ngdialog-close"></div>';
+                            }
+
+                            if (options.showMinimize) {
+                                template += '<div class="ngdialog-minimize-btn"></div>';
                             }
 
                             var hasOverlayClass = options.overlay ? '' : ' ngdialog-no-overlay';
@@ -634,9 +666,14 @@
                             closeByDocumentHandler = function (event) {
                                 var isOverlay = options.closeByDocument ? $el(event.target).hasClass('ngdialog-overlay') : false;
                                 var isCloseBtn = $el(event.target).hasClass('ngdialog-close');
+                                var isMinimizeBtn = $el(event.target).hasClass('ngdialog-minimize-btn');
 
                                 if (isOverlay || isCloseBtn) {
                                     publicMethods.close($dialog.attr('id'), isCloseBtn ? '$closeButton' : '$document');
+                                }
+
+                                if (isMinimizeBtn) {
+                                    publicMethods.minimize($dialog.attr('id'));
                                 }
                             };
 
@@ -764,6 +801,39 @@
                             var dialog = $all[i];
                             privateMethods.closeDialog($el(dialog), value);
                         }
+                    },
+
+                    minimize: function(id) {
+                        var $dialog = $el(document.getElementById(id));
+                        var minimizedId = id + '-minimized';
+
+                        privateMethods.hideDialog($dialog);
+
+                        var title = 'TESTING!';
+
+                        var titleElement = $el('<div class="ngdialog-minimized-title">' + title + '<div>');
+
+                        var maximizeButton = $el('<div class="ngdialog-maximize-btn"></div>');
+
+                        maximizeButton.bind('click', (event) => {
+                            privateMethods.closeMinimize(minimizedId);
+                            privateMethods.showDialog($dialog);
+                        });
+
+                        var closeButton = $el('<div class="ngdialog-minimized-close"></div>');
+
+                        closeButton.bind('click', (event) => {
+                            privateMethods.closeDialog($dialog, '$closeButton');
+                            privateMethods.closeMinimize(minimizedId);
+                        });
+
+                        var minimizedElement = $el('<div id="'+minimizedId+'" class="ngdialog-minimized"></div>');
+
+                        minimizedElement.append(titleElement);
+                        minimizedElement.append(maximizeButton);
+                        minimizedElement.append(closeButton);
+                        
+                        $elements.body.append(minimizedElement);
                     },
 
                     getOpenDialogs: function() {
