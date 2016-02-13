@@ -45,7 +45,6 @@
             className: 'ngdialog-theme-default',
             disableAnimation: false,
             plain: false,
-            showMinimize: true,
             showClose: true,
             closeByDocument: true,
             closeByEscape: true,
@@ -61,7 +60,9 @@
             ariaLabelledById: null,
             ariaLabelledBySelector: null,
             ariaDescribedById: null,
-            ariaDescribedBySelector: null
+            ariaDescribedBySelector: null,
+            showMinimize: false,
+            minimizedTitle: 'none titled',
         };
 
         this.setForceHtmlReload = function (_useIt) {
@@ -517,11 +518,12 @@
                      * - controllerAs {String}
                      * - className {String} - dialog theme class
                      * - disableAnimation {Boolean} - set to true to disable animation
-                     * - showMinimize {Boolean} - show minimize button, default false
                      * - showClose {Boolean} - show close button, default true
                      * - closeByEscape {Boolean} - default true
                      * - closeByDocument {Boolean} - default true
                      * - preCloseCallback {String|Function} - user supplied function name/function called before closing dialog (if set)
+                     * - showMinimize {Boolean} - show minimize button, default false
+                     * - minimizedTitle {String} - Title for the minimized element, default is 'None titled'
                      * @return {Object} dialog
                      */
                     open: function (opts) {
@@ -708,7 +710,7 @@
                                 }
 
                                 if (isMinimizeBtn) {
-                                    publicMethods.minimize($dialog.attr('id'));
+                                    publicMethods.minimize($dialog.attr('id'), options.minimizedTitle);
                                 }
                             };
 
@@ -838,7 +840,7 @@
                         }
                     },
 
-                    minimize: function(id) {
+                    minimize: function(id, minimizedTitle) {
                         privateMethods.isMoreMinimizedElementsPossible();
                         
                         var $dialog = $el(document.getElementById(id));
@@ -847,9 +849,7 @@
 
                         privateMethods.hideDialog($dialog);
 
-                        var title = minimizedId;
-
-                        var titleElement = $el('<div class="ngdialog-minimized-title">' + title + '<div>');
+                        var titleElement = $el('<div class="ngdialog-minimized-title">' + minimizedTitle + '<div>');
 
                         var maximizeButton = $el('<div class="ngdialog-maximize-btn"></div>');
                         maximizeButton.bind('click', (event) => {
@@ -926,7 +926,9 @@
                         closeByDocument: attrs.ngDialogCloseByDocument === 'false' ? false : (attrs.ngDialogCloseByDocument === 'true' ? true : defaults.closeByDocument),
                         closeByEscape: attrs.ngDialogCloseByEscape === 'false' ? false : (attrs.ngDialogCloseByEscape === 'true' ? true : defaults.closeByEscape),
                         overlay: attrs.ngDialogOverlay === 'false' ? false : (attrs.ngDialogOverlay === 'true' ? true : defaults.overlay),
-                        preCloseCallback: attrs.ngDialogPreCloseCallback || defaults.preCloseCallback
+                        preCloseCallback: attrs.ngDialogPreCloseCallback || defaults.preCloseCallback,
+                        showMinimized: attrs.ngDialogShowMinimized === 'false' ? false : (attrs.ngDialogShowMinimized === 'true' ? true : defaults.showMinimized),
+                        minimizedTitle: attrs.ngDialogMinimizedTitle || defaults.minimizedTitle
                     });
                 });
             }
