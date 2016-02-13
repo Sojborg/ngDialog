@@ -226,7 +226,7 @@
 .ngdialog-minimized {
     padding: 10px;
     padding-left: 15px;
-    min-width: 300px;
+    min-width: 200px;
     background-color: gray;
     position: absolute;
     bottom: 0;
