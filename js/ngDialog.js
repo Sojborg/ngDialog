@@ -474,13 +474,18 @@
                     },
                     
                     rearrangeMinimizedElements: function (){
-                        var leftPosition = 15;
+                        var leftPosition = 0;
                         for(var i=0;i<openMinimizedIdStack.length; i++) {
                             var minimized = $el(document.getElementById(openMinimizedIdStack[i]));
+                            
                             minimized.css({
                                 left: leftPosition+"px"
                             });
-                            leftPosition += 350;
+                            
+                            var elementWidth = minimized[0].offsetWidth;
+                            var marginBetweenMinimizedElements = 25; 
+                            
+                            leftPosition += elementWidth + marginBetweenMinimizedElements;
                         }
                     }
                 };
@@ -844,18 +849,13 @@
                         });
 
                         var minimizedElement = $el('<div id="' + minimizedId + '" class="ngdialog-minimized"></div>');
-                        if (openMinimizedIdStack.length > 1) {
-                            var leftPosition = 350 * (openMinimizedIdStack.length-1);
-                            minimizedElement.css({
-                                left: leftPosition+'px'
-                            });
-                        }
 
                         minimizedElement.append(titleElement);
                         minimizedElement.append(maximizeButton);
                         minimizedElement.append(closeButton);
                         
                         $elements.body.append(minimizedElement);
+                        privateMethods.rearrangeMinimizedElements();
                     },
 
                     getOpenDialogs: function() {
