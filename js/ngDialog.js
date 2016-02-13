@@ -475,17 +475,32 @@
                     
                     rearrangeMinimizedElements: function (){
                         var leftPosition = 0;
-                        for(var i=0;i<openMinimizedIdStack.length; i++) {
+                        for(var i=0;i<openMinimizedIdStack.length; i++) {                            
                             var minimized = $el(document.getElementById(openMinimizedIdStack[i]));
+                            var elementWidth = minimized[0].offsetWidth;
                             
                             minimized.css({
                                 left: leftPosition+"px"
                             });
                             
-                            var elementWidth = minimized[0].offsetWidth;
-                            var marginBetweenMinimizedElements = 25; 
-                            
-                            leftPosition += elementWidth + marginBetweenMinimizedElements;
+                            leftPosition += elementWidth + privateMethods.getMarginBetweenMinimizedElements();
+                        }
+                    },
+                    
+                    getMarginBetweenMinimizedElements: function() {
+                        return 25;
+                    },
+                    
+                    isMoreMinimizedElementsPossible: function() {                        
+                        var windowWidth = window.innerWidth;
+                        var elementWidth = document.getElementsByClassName('ngdialog-minimized').length > 0 ? 
+                                           document.getElementsByClassName('ngdialog-minimized')[0].offsetWidth : 0;
+                                           
+                        var currentLeftStartPosition = (elementWidth + privateMethods.getMarginBetweenMinimizedElements()) * openMinimizedIdStack.length;
+                        
+                        if ((currentLeftStartPosition+elementWidth) > windowWidth) {
+                            alert("No more minimized is possible.");
+                            return;
                         }
                     }
                 };
@@ -824,8 +839,10 @@
                     },
 
                     minimize: function(id) {
+                        privateMethods.isMoreMinimizedElementsPossible();
+                        
                         var $dialog = $el(document.getElementById(id));
-                        var minimizedId = id + '-minimized';
+                        var minimizedId = id + '-minimized';                        
                         openMinimizedIdStack.push(minimizedId);
 
                         privateMethods.hideDialog($dialog);
@@ -835,14 +852,12 @@
                         var titleElement = $el('<div class="ngdialog-minimized-title">' + title + '<div>');
 
                         var maximizeButton = $el('<div class="ngdialog-maximize-btn"></div>');
-
                         maximizeButton.bind('click', (event) => {
                             privateMethods.closeMinimize(minimizedId);
                             privateMethods.showDialog($dialog);
                         });
 
                         var closeButton = $el('<div class="ngdialog-minimized-close"></div>');
-
                         closeButton.bind('click', (event) => {
                             privateMethods.closeDialog($dialog, '$closeButton');
                             privateMethods.closeMinimize(minimizedId);
