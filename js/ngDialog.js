@@ -35,6 +35,7 @@
     var forceElementsReload = { html: false, body: false };
     var scopes = {};
     var openIdStack = [];
+    var openMinimizedIdStack = [];
     var keydownIsBound = false;
     var openOnePerName = false;
 
@@ -467,6 +468,20 @@
 
                         var $minimized = $el(minimizedElement);
                         $minimized.remove();
+
+                        openMinimizedIdStack.splice(openMinimizedIdStack.indexOf(minimizedId), 1);
+                        privateMethods.rearrangeMinimizedElements();
+                    },
+                    
+                    rearrangeMinimizedElements: function (){
+                        var leftPosition = 15;
+                        for(var i=0;i<openMinimizedIdStack.length; i++) {
+                            var minimized = $el(document.getElementById(openMinimizedIdStack[i]));
+                            minimized.css({
+                                left: leftPosition+"px"
+                            });
+                            leftPosition += 350;
+                        }
                     }
                 };
 
@@ -806,10 +821,11 @@
                     minimize: function(id) {
                         var $dialog = $el(document.getElementById(id));
                         var minimizedId = id + '-minimized';
+                        openMinimizedIdStack.push(minimizedId);
 
                         privateMethods.hideDialog($dialog);
 
-                        var title = 'TESTING!';
+                        var title = minimizedId;
 
                         var titleElement = $el('<div class="ngdialog-minimized-title">' + title + '<div>');
 
@@ -827,7 +843,13 @@
                             privateMethods.closeMinimize(minimizedId);
                         });
 
-                        var minimizedElement = $el('<div id="'+minimizedId+'" class="ngdialog-minimized"></div>');
+                        var minimizedElement = $el('<div id="' + minimizedId + '" class="ngdialog-minimized"></div>');
+                        if (openMinimizedIdStack.length > 1) {
+                            var leftPosition = 350 * (openMinimizedIdStack.length-1);
+                            minimizedElement.css({
+                                left: leftPosition+'px'
+                            });
+                        }
 
                         minimizedElement.append(titleElement);
                         minimizedElement.append(maximizeButton);
