@@ -503,6 +503,31 @@
                             alert("No more minimized is possible.");
                             return;
                         }
+                    },
+                    
+                    showMinimizedPreview: function(minimizedId, copiedPreviewContent) {
+                        var minimized = document.getElementById(minimizedId);
+                        var minimizedStyle = window.getComputedStyle(minimized);
+                        var minimizedLeftPosition = minimizedStyle.getPropertyValue('left');
+                        var minimizedWidth = minimized.offsetWidth;
+                        var minimizedHeight = minimized.offsetHeight;
+                        
+                        var previewContent = $el('<div>'+copiedPreviewContent+'</div>');
+                        previewContent.css({
+                            zoom: 0.5
+                        });
+                                                    
+                        var preview = $el('<div id="'+minimizedId+'-preview" class="ngdialog-minimized-preview"></div>');
+                        preview.css({
+                            bottom: minimizedHeight  + 'px',
+                            left: minimizedLeftPosition,
+                            width: (minimizedWidth-10)+'px'
+                        });
+                        
+                        preview.append(previewContent);
+                        
+                        var body = $el(document.body);
+                        body.append(preview);
                     }
                 };
 
@@ -850,15 +875,26 @@
                         privateMethods.hideDialog($dialog);
 
                         var titleElement = $el('<div class="ngdialog-minimized-title">' + minimizedTitle + '<div>');
+                        titleElement.bind('mouseover', function(event) {
+                            var dialog = document.getElementById(id);
+                            var copyDialogContent = dialog.getElementsByClassName('ngdialog-content')[0].innerHTML;
+                                                        
+                            privateMethods.showMinimizedPreview(minimizedId, copyDialogContent);
+                        });
+                        
+                        titleElement.bind('mouseout', function(event) {                            
+                            var mini = $el(document.getElementById(minimizedId+'-preview'));
+                            mini.remove();
+                        });
 
                         var maximizeButton = $el('<div class="ngdialog-maximize-btn"></div>');
-                        maximizeButton.bind('click', (event) => {
+                        maximizeButton.bind('click', function (event) {
                             privateMethods.closeMinimize(minimizedId);
                             privateMethods.showDialog($dialog);
                         });
 
                         var closeButton = $el('<div class="ngdialog-minimized-close"></div>');
-                        closeButton.bind('click', (event) => {
+                        closeButton.bind('click', function (event) {
                             privateMethods.closeDialog($dialog, '$closeButton');
                             privateMethods.closeMinimize(minimizedId);
                         });

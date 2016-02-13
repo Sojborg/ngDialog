@@ -288,3 +288,10 @@
     text-align: right;
 	width: 8px;
 }
+
+.ngdialog-minimized-preview {    
+    position: absolute;
+    background-color: gray;
+    opacity: 0.8;
+    padding: 5px;
+}
