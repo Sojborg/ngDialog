@@ -501,8 +501,9 @@
                         
                         if ((currentLeftStartPosition+elementWidth) > windowWidth) {
                             alert("No more minimized is possible.");
-                            return;
+                            return false;
                         }
+                        return true;
                     },
                     
                     showMinimizedPreview: function(minimizedId, copiedPreviewContent, dialogcontentwidth) {
@@ -867,7 +868,8 @@
                     },
 
                     minimize: function(id, minimizedTitle) {
-                        privateMethods.isMoreMinimizedElementsPossible();
+                        if (!privateMethods.isMoreMinimizedElementsPossible())
+                            return;
                         
                         var dialogElement = document.getElementById(id);
                         var $dialog = $el(dialogElement);
