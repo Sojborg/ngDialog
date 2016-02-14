@@ -505,16 +505,17 @@
                         }
                     },
                     
-                    showMinimizedPreview: function(minimizedId, copiedPreviewContent) {
+                    showMinimizedPreview: function(minimizedId, copiedPreviewContent, dialogcontentwidth) {
                         var minimized = document.getElementById(minimizedId);
                         var minimizedStyle = window.getComputedStyle(minimized);
                         var minimizedLeftPosition = minimizedStyle.getPropertyValue('left');
                         var minimizedWidth = minimized.offsetWidth;
                         var minimizedHeight = minimized.offsetHeight;
+                        var zoomlevel = ((minimizedWidth/dialogcontentwidth)*100)/100;
                         
                         var previewContent = $el('<div>'+copiedPreviewContent+'</div>');
                         previewContent.css({
-                            zoom: 0.5
+                            zoom: zoomlevel
                         });
                                                     
                         var preview = $el('<div id="'+minimizedId+'-preview" class="ngdialog-minimized-preview"></div>');
@@ -868,9 +869,13 @@
                     minimize: function(id, minimizedTitle) {
                         privateMethods.isMoreMinimizedElementsPossible();
                         
-                        var $dialog = $el(document.getElementById(id));
+                        var dialogElement = document.getElementById(id);
+                        var $dialog = $el(dialogElement);
                         var minimizedId = id + '-minimized';                        
                         openMinimizedIdStack.push(minimizedId);
+                        
+                        // save the width of the dialog content before hiding it
+                        var dialogContentWidth = dialogElement.getElementsByClassName('ngdialog-content')[0].offsetWidth
 
                         privateMethods.hideDialog($dialog);
 
@@ -879,7 +884,7 @@
                             var dialog = document.getElementById(id);
                             var copyDialogContent = dialog.getElementsByClassName('ngdialog-content')[0].innerHTML;
                                                         
-                            privateMethods.showMinimizedPreview(minimizedId, copyDialogContent);
+                            privateMethods.showMinimizedPreview(minimizedId, copyDialogContent, dialogContentWidth);
                         });
                         
                         titleElement.bind('mouseout', function(event) {                            
