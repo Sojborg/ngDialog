@@ -294,4 +294,5 @@
     background-color: gray;
     opacity: 0.8;
     padding: 5px;
+    z-index:99999;
 }
